@@ -1,6 +1,10 @@
 'use strict'
 
-const distance = require('./distance')
+const server = require('./src/server.js')
 
 
-console.log( 'distance', distance(' ', 'pamella') )
+let port = process.argv[2]
+
+server.listen(port, () => {
+    console.log(`Running on port ${ port }...`)
+})

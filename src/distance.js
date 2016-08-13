@@ -1,8 +1,4 @@
 'use strict'
-// ------ MOVE THIS TO README ------
-// Bernardo Mariano's JS implementation of Leveshtein Distance based on
-// https://pt.wikipedia.org/wiki/Dist%C3%A2ncia_Levenshtein#O_algoritmo
-
 
 const distance = (wordA, wordB) => {
     if (!(wordA && wordB)) return (wordB || wordA).length

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node ./index.js 3000",
     "test": "./node_packages/.bin/jasmine-node specs/"
   },
   "author": "Bernardo Mariano <bernamariano@gmail.com>",
