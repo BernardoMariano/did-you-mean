@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./index.js 3000",
-    "test": "./node_packages/.bin/jasmine-node specs/"
+    "start": "node ./index.js",
+    "test": "./node_modules/mocha/bin/mocha test/"
   },
   "author": "Bernardo Mariano <bernamariano@gmail.com>",
   "license": "ISC",
@@ -16,7 +16,8 @@
     "normalize-for-search": "^2.0.1"
   },
   "devDependencies": {
-    "jasmine-node": "^1.14.5",
-    "request": "^2.74.0"
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "mocha": "^3.0.2"
   }
 }
