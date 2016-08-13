@@ -1,0 +1,21 @@
+{
+  "name": "leveshtein-distance",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "./node_packages/.bin/jasmine-node specs/"
+  },
+  "author": "Bernardo Mariano <bernamariano@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "normalize-for-search": "^2.0.1"
+  },
+  "devDependencies": {
+    "jasmine-node": "^1.14.5",
+    "request": "^2.74.0"
+  }
+}
