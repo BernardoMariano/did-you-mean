@@ -10,10 +10,15 @@ const normalize  = require('normalize-for-search')
 const distance = require('./distance')
 
 
+let wordsPath
+if (process.env.NODE_ENV === 'dev') {
+    wordsPath = './test-words.json'
+} else {
+    wordsPath = join(__dirname, 'words.json')
+}
+
 let words = []
 let wordsSet
-
-const wordsPath = join(__dirname, 'words.json')
 
 jsonfile.readFile(wordsPath, (err, data) => {
     if (!err) {
@@ -26,21 +31,25 @@ const app = express()
 
 app.use(bodyParser.json())
 
-app.get('/words', (req, res) => {
-    res.status(200).send([...wordsSet])
-})
-
-app.put('/word', (req, res) => {
-    let word = req.body['word']
-    wordsSet.add(word)
-    jsonfile.writeFile(wordsPath, [...wordsSet], err => {
-        if (!err) {
-            res.status(200).send(String(wordsSet.size))
-        } else {
-            res.status(400).send(err)
-        }
+app.route('/words')
+    .get((req, res) => {
+        res.status(200).send([...wordsSet])
     })
-})
+    .put((req, res) => {
+        let word = req.body['word']
+        if (!word) {
+            return res.status(400).end()
+        }
+        wordsSet.add(word)
+        let result = [...wordsSet]
+        jsonfile.writeFile(wordsPath, result, err => {
+            if (!err) {
+                res.status(200).send(result)
+            } else {
+                res.status(400).send(err)
+            }
+        })
+    })
 
 const getDistance = (word, keyword) => {
     let cost = distance(normalize(word), keyword)
@@ -58,7 +67,7 @@ const byLeastCost = (wordA, wordB) => {
 }
 
 app.get('/retrieve', (req, res) => {
-    let keyword   = normalize(req.query['keyword'])
+    let keyword   = normalize(req.query['keyword'] || '')
     let threshold = req.query['threshold'] || 3
     let similars  = [...wordsSet].map(word => getDistance(word, keyword))
                                  .filter(word => isSimilar(word, threshold))
