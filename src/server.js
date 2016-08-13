@@ -1,8 +1,8 @@
 'use strict'
 
-const fs       = require('fs')
 const { join } = require('path')
 
+const jsonfile   = require('jsonfile')
 const express    = require('express')
 const bodyParser = require('body-parser')
 const normalize  = require('normalize-for-search')
@@ -15,9 +15,9 @@ let wordsSet
 
 const wordsPath = join(__dirname, 'words.json')
 
-fs.readFile(wordsPath, (err, data) => {
+jsonfile.readFile(wordsPath, (err, data) => {
     if (!err) {
-        words = JSON.parse(data.toString())
+        words = data
     }
     wordsSet = new Set(words)
 })
@@ -33,7 +33,7 @@ app.get('/words', (req, res) => {
 app.put('/word', (req, res) => {
     let word = req.body['word']
     wordsSet.add(word)
-    fs.writeFile(wordsPath, JSON.stringify([...wordsSet]), err => {
+    jsonfile.writeFile(wordsPath, [...wordsSet], err => {
         if (!err) {
             res.status(200).send(String(wordsSet.size))
         } else {
