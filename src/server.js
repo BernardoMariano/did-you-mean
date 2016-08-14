@@ -40,6 +40,9 @@ app.route('/words')
         if (!word) {
             return res.status(400).end()
         }
+        if (wordsSet.has(word)) {
+            return res.status(208).send([...wordsSet])
+        }
         wordsSet.add(word)
         let result = [...wordsSet]
         jsonfile.writeFile(wordsPath, result, err => {
