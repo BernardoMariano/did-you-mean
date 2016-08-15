@@ -7,7 +7,7 @@ const express    = require('express')
 const bodyParser = require('body-parser')
 const normalize  = require('normalize-for-search')
 
-const distance = require('./distance')
+const WordsDistance = require('./words-distance')
 
 
 let wordsPath
@@ -17,14 +17,14 @@ if (process.env.NODE_ENV === 'dev') {
     wordsPath = join(__dirname, 'words.json')
 }
 
-let words = []
-let wordsSet
+let words
 
 jsonfile.readFile(wordsPath, (err, data) => {
+    let _words = []
     if (!err) {
-        words = data
+        _words = data
     }
-    wordsSet = new Set(words)
+    words = new WordsDistance(_words)
 })
 
 const app = express()
@@ -33,18 +33,18 @@ app.use(bodyParser.json())
 
 app.route('/words')
     .get((req, res) => {
-        res.status(200).send([...wordsSet])
+        res.status(200).send([...words])
     })
     .put((req, res) => {
         let word = req.body['word']
         if (!word) {
             return res.status(400).end()
         }
-        if (wordsSet.has(word)) {
-            return res.status(208).send([...wordsSet])
+        if (words.has(word)) {
+            return res.status(208).send([...words])
         }
-        wordsSet.add(word)
-        let result = [...wordsSet]
+        words.add(word)
+        let result = [...words]
         jsonfile.writeFile(wordsPath, result, err => {
             if (!err) {
                 res.status(200).send(result)
@@ -54,27 +54,10 @@ app.route('/words')
         })
     })
 
-const getDistance = (word, keyword) => {
-    let cost = distance(normalize(word), keyword)
-    return { word, cost }
-}
-
-const isSimilar = (word, threshold) => {
-    return word.cost > 0 && word.cost <= threshold
-}
-
-const byLeastCost = (wordA, wordB) => {
-    if (wordA.cost > wordB.cost) return 1
-    if (wordA.cost < wordB.cost) return -1
-    return 0
-}
-
 app.get('/retrieve', (req, res) => {
     let keyword   = normalize(req.query['keyword'] || '')
-    let threshold = req.query['threshold'] || 3
-    let similars  = [...wordsSet].map(word => getDistance(word, keyword))
-                                 .filter(word => isSimilar(word, threshold))
-                                 .sort(byLeastCost)
+    let threshold = req.query['threshold']
+    let similars  = words.getSimilars(keyword, threshold)
     res.status(200).send(similars)
 })
 
