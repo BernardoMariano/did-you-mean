@@ -11,13 +11,13 @@ const getDistance = R.curry((keyword, word) => {
     return { word, cost }
 })
 
-const isDifferent = R.propSatisfies(cost => cost > 0, 'cost')
+const isDifferent = R.gt(R.__, 0)
 
 const isLessThanThreshold = threshold => R.lte(R.__, threshold)
 
 const isSimilar = R.curry((threshold, word) => {
     const isClose = isLessThanThreshold(threshold)
-    const isSimilar = R.and(isDifferent(word), isClose(word.cost))
+    const isSimilar = R.and(isDifferent(word.cost), isClose(word.cost))
     return isSimilar
 })
 
