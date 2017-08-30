@@ -1,39 +1,38 @@
 'use strict'
 
 const normalize  = require('normalize-for-search')
+const R = require('ramda')
 
 const distance = require('./distance')
 
 
-const getDistance = (word, keyword) => {
-    let cost = distance(normalize(word), keyword)
+const getDistance = R.curry((keyword, word) => {
+    const cost = distance(normalize(word), keyword)
     return { word, cost }
-}
+})
 
-const isSimilar = (word, threshold) => {
-    return word.cost > 0 && word.cost <= threshold
-}
+const isDifferent = R.propSatisfies(cost => cost > 0, 'cost')
 
-const byLeastCost = (wordA, wordB) => {
-    if (wordA.cost > wordB.cost) return 1
-    if (wordA.cost < wordB.cost) return -1
-    return 0
-}
+const isLessThanThreshold = threshold => R.lte(R.__, threshold)
+
+const isSimilar = R.curry((threshold, word) => {
+    const isClose = isLessThanThreshold(threshold)
+    const isSimilar = R.and(isDifferent(word), isClose(word.cost))
+    return isSimilar
+})
+
+const getSimilars = (keyword, threshold) => R.compose(
+    R.sortBy(R.prop('cost')),
+    R.filter(isSimilar(threshold)),
+    R.map(getDistance(keyword))
+)
 
 class WordsDistance extends Set {
-
-    constructor(words) {
-        super(words)
-    }
-
     getSimilars(keyword, threshold) {
         threshold = threshold || 3
-        let similars  = [...this].map(word => getDistance(word, keyword))
-                                 .filter(word => isSimilar(word, threshold))
-                                 .sort(byLeastCost)
-        return similars
+        const similars = getSimilars(keyword, threshold)
+        return similars([...this])
     }
-
 }
 
 module.exports = WordsDistance
